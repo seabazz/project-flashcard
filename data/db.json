@@ -53,24 +53,6 @@
       "back": "b",
       "deckId": 1,
       "id": 7
-    },
-    {
-      "front": "What is a brown animal?",
-      "back": "Sometimes dogs are brown.",
-      "deckId": 3,
-      "id": 8
-    },
-    {
-      "front": "Why is the sky blue?",
-      "back": "Light spectrum",
-      "deckId": 3,
-      "id": 9
-    },
-    {
-      "front": "1+1 = ?",
-      "back": "2",
-      "deckId": 3,
-      "id": 10
     }
   ]
 }
