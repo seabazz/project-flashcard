@@ -1,109 +1,59 @@
 import React, { useState, useEffect } from "react";
 import { Link, useHistory, useParams } from "react-router-dom";
-import { readCard, readDeck, updateCard } from "../utils/api/index";
+import { readDeck, readCard, updateCard } from "../utils/api";
+import CardForm from "./CardForm";
 
+// Function to edit an existing card in the deck
 function EditCard() {
-  const { deckId, cardId } = useParams();
-  const history = useHistory();
-  const initialDeckState = {
-    id: "",
-    name: "",
-    description: "",
-  };
-  const initialCardState = {
-    id: "",
-    front: "",
-    back: "",
-    deckId: "",
-  };
+    const { deckId, cardId } = useParams();
+    const [deck, setDeck] = useState({});
+    const [card, setCard] = useState({ front: "", back: "" });
+    const history = useHistory();
 
-  const [card, setCard] = useState(initialDeckState);
-  const [deck, setDeck] = useState(initialCardState);
+    // Loads the deck and card from the database using the readDeck and readCard API calls
+    useEffect(() => {
+        const loadDeckAndCard = async () => {
+        const loadedDeck = await readDeck(deckId);
+        const loadedCard = await readCard(cardId);
+        setDeck(loadedDeck);
+        setCard(loadedCard);
+        };
 
-  useEffect(() => {
-    async function fetchData() {
-      const abortController = new AbortController();
-      try {
-        const cardResponse = await readCard(cardId, abortController.signal);
-        const deckResponse = await readDeck(deckId, abortController.signal);
-        setCard(cardResponse);
-        setDeck(deckResponse);
-      } catch (error) {
-        console.error("Something went wrong", error);
-      }
-      return () => {
-        abortController.abort();
-      };
-    }
-    fetchData();
-  }, []);
+        loadDeckAndCard();
+    }, [deckId, cardId]);
 
-  function handleChange({ target }) {
-    setCard({
-      ...card,
-      [target.name]: target.value,
-    });
-  }
+    // handleSubmit function to update the card in the deck with updateCard API
+    const handleSubmit = async (event) => {
+        await updateCard(event);
+        history.push(`/decks/${deck.id}`);
+    };
 
-  async function handleSubmit(event) {
-    event.preventDefault();
-    const abortController = new AbortController();
-    const response = await updateCard({ ...card }, abortController.signal);
-    history.push(`/decks/${deckId}`);
-    return response;
-  }
-
-  async function handleCancel() {
-    history.push(`/decks/${deckId}`);
-  }
-
-  return (
-    <div>
-      <ol className="breadcrumb">
-        <li className="breadcrumb-item">
-          <Link to="/">Home</Link>
-        </li>
-        <li className="breadcrumb-item">
-          <Link to={`/decks/${deckId}`}>{deck.name}</Link>
-        </li>
-        <li className="breadcrumb-item active">Edit Card {cardId}</li>
-      </ol>
-      <form onSubmit={handleSubmit}>
-        <h2>Edit Card</h2>
-        <div className="form-group">
-          <label>Front</label>
-          <textarea
-            id="front"
-            name="front"
-            className="form-control"
-            onChange={handleChange}
-            type="text"
-            value={card.front}
-          />
+    // Breadcrumbs for navigation are provided here
+    // The form to handle the input is in CardForm.js
+    // The card.front && card.back check is to prevent the form from showing before the card is loaded
+    return (
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol className="breadcrumb">
+                    <li className="breadcrumb-item">
+                        <Link to="/">Home</Link>
+                    </li>
+                    <li className="breadcrumb-item">
+                        <Link to={`/decks/${deck.id}`}>{deck.name}</Link>
+                    </li>
+                    <li className="breadcrumb-item active" aria-current="page">
+                        Edit Card {cardId}
+                    </li>
+                </ol>
+            </nav>
+            <h2>Edit Card</h2>
+            {card.front && card.back ? (
+                <CardForm onSubmit={handleSubmit} deckId={deckId} initialValues={card} />
+            ) : (
+                <p>Loading...</p>
+            )}
         </div>
-        <div className="form-group">
-          <label>Back</label>
-          <textarea
-            id="back"
-            name="back"
-            className="form-control"
-            onChange={handleChange}
-            type="text"
-            value={card.back}
-          />
-        </div>
-        <button
-          className="btn btn-secondary mx-1"
-          onClick={() => handleCancel()}
-        >
-          Cancel
-        </button>
-        <button className="btn btn-primary mx-1" type="submit">
-          Save
-        </button>
-      </form>
-    </div>
-  );
+    );
 }
 
 export default EditCard;

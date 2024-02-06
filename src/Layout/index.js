@@ -10,7 +10,7 @@ import Deck from "../Deck/Deck";
 import CreateDeck from "../Deck/CreateDeck";
 import EditDeck from "../Deck/EditDeck";
 
-import AddCard from "../Card/AddCard";
+import AddCard from "../Card/CreateCard";
 import EditCard from "../Card/EditCard";
 
 function Layout() {
